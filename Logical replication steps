@@ -1,1 +1,50 @@
+1) Configure Publisher :
+
+Changes to be done in postgresql.conf :
+
+wal_level = logical
+max_replication_slots = 10;
+max_wal_senders = 10
+
+3) Changes to be done in pg_hba.conf : 
+
+host  intellidb   replicator   <subscriber ip>/32   trust/md5
+host  replication replicator   <subscriber ip>/32   trust/md5
+
+4) Reload/ Restart the server :
+
+sudo systemctl reload/restart intellidb
+
+5) Create role for replication (On Publisher) :
+
+CREATE ROLE replicator WITH LOGIN PASSWORD 'replica_pass';       #if md5 is used in pg_hba.conf
+CREATE ROLE replicator WITH LOGIN;                               #if trust is used in pg_hba.conf
+
+6) Create publication (On Publisher) :
+
+CREATE PUBLICATION my_publication FOR ALL TABLES;
+
+7) Grant select role to the replicator
+
+GRANT SELECT ON test TO replicator;
+
+8) Create subscription on Subscriber
+
+CREATE SUBSCRIPTION my_subscription
+CONNECTION 'host=<publisher_ip> port=5555 dbname=intellidb user=replicator password=replica_pass'
+PUBLICATION my_publication
+WITH (copy_data = true);
+
+9) Verify by creating a table on both the servers and inserting the data in that table on publisher and then checking it on the subscriber
+
+To refresh the data on both you can use 
+
+ALTER SUBSCRIPTION my_subscription REFRESH PUBLICATION;
+
+
+
+
+
+
+
 
