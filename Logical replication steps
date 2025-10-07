@@ -11,14 +11,14 @@ max_wal_senders = 10
 host  intellidb   replicator   <subscriber ip>/32   trust/md5
 host  replication replicator   <subscriber ip>/32   trust/md5
 
-4) Reload/ Restart the server :
+4) Reload/ Restart the Publisher server :
 
 sudo systemctl reload/restart intellidb
 
 5) Create role for replication (On Publisher) :
 
-CREATE ROLE replicator WITH LOGIN PASSWORD 'replica_pass';       #if md5 is used in pg_hba.conf
-CREATE ROLE replicator WITH LOGIN;                               #if trust is used in pg_hba.conf
+CREATE ROLE replicator WITH LOGIN REPLICATION PASSWORD 'replica_pass';       #if md5 is used in pg_hba.conf
+CREATE ROLE replicator WITH LOGIN REPLICATION;                               #if trust is used in pg_hba.conf
 
 6) Create publication (On Publisher) :
 
@@ -26,7 +26,7 @@ CREATE PUBLICATION my_publication FOR ALL TABLES;
 
 7) Grant select role to the replicator
 
-GRANT SELECT ON test TO replicator;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO replicator;
 
 8) Create subscription on Subscriber
 
